@@ -6,3 +6,4 @@
 
 -   (Easyboom24, Shentsov) Шенцов Ярослав
 -   (Baldens, DennisSupport) Медведев Денис
+-   (Vsevoo) Волчок Всеволод  
