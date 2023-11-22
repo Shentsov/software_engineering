@@ -3,7 +3,7 @@ import streamlit as st
 import razdel
 import torch
 # Модель для поиска именованных сущностей от SpaCy из Hugging Face
-import ru_core_news_lg
+import ru_core_news_md
 
 
 # суммаризация (реферирование)
@@ -54,7 +54,7 @@ def summarize(text, ratio=50):
     return summary
 
 
-nlp = ru_core_news_lg.load()
+nlp = ru_core_news_md.load()
 def searchNER(text):
     doc = nlp(text)
     colors = {"PER": "#9966cc", "ORG": "green", "LOC": "#1dacd6", "Date": "red", "Money": "yellow"}
