@@ -1,9 +1,8 @@
-from transformers import AutoTokenizer, AutoModelForTokenClassification, BertForTokenClassification
+from transformers import AutoTokenizer, BertForTokenClassification
 import streamlit as st
 import razdel
 import torch
-# Модель для поиска именованных сущностей от SpaCy из Hugging Face
-import ru_core_news_md
+
 
 
 # суммаризация (реферирование)
@@ -54,41 +53,15 @@ def summarize(text, ratio=50):
     return summary
 
 
-nlp = ru_core_news_md.load()
-def searchNER(text):
-    doc = nlp(text)
-    colors = {"PER": "#9966cc", "ORG": "green", "LOC": "#1dacd6", "Date": "red", "Money": "yellow"}
-    edited_text = ""
-    for token in doc:
-        if token.ent_type_ in colors.keys():
-            edited_text += "<span style=\"color:" + colors[token.ent_type_] + ";\">"+ token.text +"</span> "
-        else:
-            edited_text += token.text + ' '
-    return edited_text
 
-
-st.title("Приложение для реферирования текста и поиска именнованных сущностей (NER)")
+st.title("Приложение для реферирования текста")
 
 input_text = st.text_area("Введите текст:")
 ratio = st.slider('Выберите процент сокращения текста', 0, 100, 50)
-input_text_ner = st.checkbox('Поиск NER в исходном тексте')
-output_text_ner = st.checkbox('Поиск NER в сокращенном тексте')
 
-st.write('Цветовое обозночение NER:')
-st.write('| Имена 🟣 |', ' Организации 🟢 |', ' Локации 🔵 |', ' Валюта 🟡 |', 'Даты 🔴 |')
 
 if st.button("Реферировать"):
     with st.spinner('Обработка...'):
         summary = summarize(input_text, ratio)
-        if input_text_ner:
-            result = searchNER(input_text)
-            st.header('Исходный текст с выделенными NER')
-            st.markdown(result, unsafe_allow_html=True)
-
-        if output_text_ner:
-            result = searchNER(summary)
-            st.header('Сокращенный текст с выделенными NER')
-            st.markdown(result, unsafe_allow_html=True)
-        else:
-            st.header('Сокращенный текст')
-            st.write(summary)
+        st.header('Сокращенный текст')
+        st.write(summary)
