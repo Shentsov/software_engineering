@@ -1,11 +1,14 @@
-from transformers import AutoTokenizer, AutoModelForTokenClassification, BertForTokenClassification
-import streamlit as st
+from transformers import AutoTokenizer, BertForTokenClassification
 import razdel
 import torch
 # Модель для поиска именованных сущностей от SpaCy из Hugging Face
-import ru_core_news_lg
+import ru_core_news_md
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+import json 
 
-
+app = FastAPI()
+  
 # суммаризация (реферирование)
 summarization_model_name = "IlyaGusev/rubert_ext_sum_gazeta"
 summarization_tokenizer = AutoTokenizer.from_pretrained(summarization_model_name)
@@ -23,7 +26,18 @@ else:
 
 sum_model.to(device="cpu")
 
+nlp = ru_core_news_md.load()
+
+# Возвращает сокращенный текст
+# Параметры: text - исходный текст, ratio - процент сокращения
+@app.get("/summarize")
 def summarize(text, ratio=50):
+    if ratio < 0:
+        ratio = 10
+    
+    if ratio > 100:
+        ratio = 100
+
     sentences = [s.text for s in razdel.sentenize(text)]
     sentences_count = len(sentences)
     text = sep_token.join(sentences)
@@ -52,3 +66,18 @@ def summarize(text, ratio=50):
     indices = list(sorted([idx for _, idx in pairs]))
     summary = " ".join([sentences[idx] for idx in indices])
     return summary
+
+
+# Возвращает массив объектов сущностей
+# start - начальная позиция сущности
+# end - конечная позиция сущности
+# label - тип сущности (LOC - локация, ORG - организация, PER - персона и т.д.)
+# value - значение (само слово или словосочетание)
+@app.get("/search-ner")
+def searchNER(text):
+    doc = nlp(text)
+    text = doc.text
+    obj = doc.to_json()
+    for token in obj['ents']:
+        token['value'] = text[token['start']:token['end']]
+    return obj['ents']
