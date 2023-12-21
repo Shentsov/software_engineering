@@ -5,9 +5,8 @@ import torch
 import ru_core_news_md
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-import json 
+import json
 
-app = FastAPI()
   
 # суммаризация (реферирование)
 summarization_model_name = "IlyaGusev/rubert_ext_sum_gazeta"
@@ -30,12 +29,11 @@ nlp = ru_core_news_md.load()
 
 # Возвращает сокращенный текст
 # Параметры: text - исходный текст, ratio - процент сокращения
-@app.get("/summarize")
 def summarize(text, ratio=50):
-    if ratio < 0:
+    if int(ratio) < 0:
         ratio = 10
     
-    if ratio > 100:
+    if int(ratio) > 100:
         ratio = 100
 
     sentences = [s.text for s in razdel.sentenize(text)]
@@ -61,7 +59,7 @@ def summarize(text, ratio=50):
     logits, indices = logits.sort(descending=True)
     logits, indices = logits.cpu().tolist(), indices.cpu().tolist()
     pairs = list(zip(logits, indices))
-    length = int(sentences_count*(ratio/100))
+    length = int(sentences_count*(int(ratio)/100))
     pairs = pairs[:length]
     indices = list(sorted([idx for _, idx in pairs]))
     summary = " ".join([sentences[idx] for idx in indices])
@@ -73,7 +71,6 @@ def summarize(text, ratio=50):
 # end - конечная позиция сущности
 # label - тип сущности (LOC - локация, ORG - организация, PER - персона и т.д.)
 # value - значение (само слово или словосочетание)
-@app.get("/search-ner")
 def searchNER(text):
     doc = nlp(text)
     text = doc.text
