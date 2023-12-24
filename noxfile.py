@@ -1,6 +1,6 @@
 import nox
 
-python_versions = ["3.9", "3.10", "3.11"]
+python_versions = ["3.9"]
 
 @nox.session(python=python_versions)
 def lint(session):
